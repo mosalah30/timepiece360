@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "558245920334",
+    "firebase_url": "https://timepiece360-dd869.firebaseio.com",
+    "project_id": "timepiece360-dd869",
+    "storage_bucket": "timepiece360-dd869.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558245920334:android:a9df04dc4d63e576",
+        "android_client_info": {
+          "package_name": "com.example.timepiece360"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558245920334-4bi22pr78btvhb6itpjdt5ndtkgntctr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCRLFmQMpfwNKrTrkewByjmUp9kh2JrLO8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "558245920334-4bi22pr78btvhb6itpjdt5ndtkgntctr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
