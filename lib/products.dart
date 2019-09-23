@@ -10,7 +10,7 @@ class Products extends StatefulWidget {
 
 class _ProductsState extends State<Products> {
   String _currentUser, totalBill;
-  int total = 0;
+  int _overallBill = 0;
 
   Widget _titleText(String text) => Padding(
         padding: EdgeInsets.all(5),
@@ -110,7 +110,7 @@ class _ProductsState extends State<Products> {
                   child: Container(
                       height: 40,
                       child: Card(
-                          child: Center(child: _titleText('\$ '+total.toString()))))),
+                          child: Center(child: _titleText('\$ '+_overallBill.toString()))))),
             ],
           ))
         ],
@@ -128,12 +128,12 @@ class _ProductsState extends State<Products> {
         .document('cart')
         .collection('id')
         .getDocuments();
-    var k = 0;
+    var _bill = 0;
     documents.documents.forEach((index) {
-      k += int.parse(index.data['total']);
+      _bill += int.parse(index.data['total']);
     });
     setState(() {
-      total = k;
+      _overallBill = _bill;
     });
     return documents.documents;
   }
