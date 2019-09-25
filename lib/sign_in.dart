@@ -7,12 +7,14 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomPadding: false,
+      resizeToAvoidBottomPadding: true,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Theme.of(context).primaryColor,
         title: Text("Time Piece 360"),
       ),
       body: _MyLoginScreen(),
+
     );
   }
 }
@@ -29,7 +31,7 @@ class _LoginScreenState extends State<_MyLoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
-  String _errorMessageEvent="";
+  String _errorMessageEvent = "";
 
   _isValidSignIn(String email, String password) {
     if (email == null || email.trim().isEmpty) {
@@ -58,12 +60,12 @@ class _LoginScreenState extends State<_MyLoginScreen> {
     await prefs.setString('password', password);
   }
 
-   _signInWithEmailAndPassword() async {
+  _signInWithEmailAndPassword() async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi) {
       try {
-        final  user = await _auth.signInWithEmailAndPassword(
+        final user = await _auth.signInWithEmailAndPassword(
           email: _emailController.text,
           password: _passwordController.text,
         );
@@ -71,6 +73,7 @@ class _LoginScreenState extends State<_MyLoginScreen> {
           _saveProfileSharedPreference(
               email: _emailController.text, password: _passwordController.text);
           Navigator.pushReplacementNamed(context, "/HomeScreen");
+          return user;
         }
       } catch (error) {
         if (error.toString().contains("ERROR_USER_NOT_FOUND")) {
@@ -104,97 +107,100 @@ class _LoginScreenState extends State<_MyLoginScreen> {
         margin: EdgeInsets.all(20),
         child: ListView(
           children: <Widget>[
-            Column(
-              mainAxisSize: MainAxisSize.max,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(height: 100),
-                Text(
-                  "Sign In",
-                  style: TextStyle(
-                      decoration: TextDecoration.none,
-                      fontSize: 50,
-                      fontStyle: FontStyle.italic,
-                      color: Theme.of(context).accentColor),
-                ),
-                SizedBox(height: 30),
-                TextFormField(
-                    controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                        labelText: "Email",
-                        fillColor: Theme.of(context).accentColor,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(width: 5.0, color: Theme.of(context).accentColor),
+            SizedBox(height: 100),
+            Center(
+              child: Text(
+                "Sign In",
+                style: TextStyle(
+                    decoration: TextDecoration.none,
+                    fontSize: 50,
+                    fontStyle: FontStyle.italic,
+                    color: Theme.of(context).accentColor),
+              ),
+            ),
+            SizedBox(height: 30),
+            TextFormField(
+                controller: _emailController,
+                keyboardType: TextInputType.emailAddress,
+                maxLines: 1,
+                decoration: InputDecoration(
+                    labelText: "Email",
+                    fillColor: Theme.of(context).accentColor,
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          width: 5.0, color: Theme.of(context).accentColor),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(
+                          color: Theme.of(context).accentColor,
+                          width: 5,
                         ),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Theme.of(context).accentColor,
-                              width: 5,
-                            ),
-                            borderRadius: BorderRadius.circular(10)))),
-                SizedBox(
-                  height: 20,
-                ),
-                TextFormField(
-                  controller: _passwordController,
-                  keyboardType: TextInputType.emailAddress,
-                  maxLines: 1,
-                  obscureText: true,
-                  decoration: InputDecoration(
-                      labelText: ' Password',
-                      enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(width: 5.0, color: Theme.of(context).accentColor)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: Theme.of(context).accentColor,
-                            width: 5,
-                          ),
-                          borderRadius: BorderRadius.circular(10))),
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                FlatButton(
-                  shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide:
-                          BorderSide(color: Theme.of(context).accentColor)),
-                  color: Theme.of(context).accentColor,
-                  child: Text("Sign in"),
-                  onPressed: () {
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                        borderRadius: BorderRadius.circular(10)))),
+            SizedBox(
+              height: 20,
+            ),
+            TextFormField(
+              controller: _passwordController,
+              keyboardType: TextInputType.emailAddress,
+              maxLines: 1,
+              obscureText: true,
+              decoration: InputDecoration(
+                  labelText: ' Password',
+                  enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                          width: 5.0,
+                          color: Theme.of(context).accentColor)),
+                  focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context).accentColor,
+                        width: 5,
+                      ),
+                      borderRadius: BorderRadius.circular(10))),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            Center(
+              child: FlatButton(
+                shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).accentColor)),
+                color: Theme.of(context).accentColor,
+                child: Text("Sign in"),
+                onPressed: () {
+                  FocusScope.of(context).requestFocus(new FocusNode());
 
-                    if (_isValidSignIn(_emailController.value.text,
-                        _passwordController.value.text)) {
-                      _signInWithEmailAndPassword();
-                    } else {
-                      setState(() {
-                        Scaffold.of(context).showSnackBar(
-                            SnackBar(content: Text(_errorMessageEvent)));
-                      });
-                    }
-                  },
-                ),
-                SizedBox(
-                  height: 30,
-                ),
-                FlatButton(
-                  shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide:
-                          BorderSide(color: Theme.of(context).accentColor)),
-                  color: Theme.of(context).accentColor,
-                  child: Text("Sign Up"),
-                  onPressed: () {
-                    Navigator.of(context).pushNamed('/SignUp');
-                  },
-                )
-              ],
-            )
+                  if (_isValidSignIn(_emailController.value.text,
+                      _passwordController.value.text)) {
+                    _signInWithEmailAndPassword();
+                  } else {
+                    setState(() {
+                      Scaffold.of(context).showSnackBar(
+                          SnackBar(content: Text(_errorMessageEvent)));
+                    });
+                  }
+
+                },
+              ),
+            ),
+            SizedBox(
+              height: 30,
+            ),
+            Center(
+              child: FlatButton(
+                shape: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                    borderSide:
+                        BorderSide(color: Theme.of(context).accentColor)),
+                color: Theme.of(context).accentColor,
+                child: Text("Sign Up"),
+                onPressed: () {
+                  Navigator.of(context).pushNamed('/SignUp');
+                },
+              ),
+            ),
+
           ],
         ),
       ),

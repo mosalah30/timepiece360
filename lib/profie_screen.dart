@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -9,6 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:connectivity/connectivity.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:easy_dialog/easy_dialog.dart';
 
 class ProfileScreen extends StatefulWidget {
   @override
@@ -21,8 +21,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = FirebaseAuth.instance;
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _rePasswordController = TextEditingController();
+  final _oldPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
   String _errorMessageEvent = '';
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   String _currentUser;
@@ -34,8 +34,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     Navigator.pushReplacementNamed(context, "/LoginScreen");
   }
 
+  _isValidPassword(String oldPassword, String newPassword) {
+    if (oldPassword == null ||
+        oldPassword.trim().isEmpty ||
+        oldPassword.length < 7) {
+      _errorMessageEvent =
+          "you must write your  password  more than 8 character";
+      return false;
+    }
+
+    if (oldPassword == oldPassword.toLowerCase ||
+        oldPassword == oldPassword.toUpperCase) {
+      _errorMessageEvent = "Password must include small and capital letter";
+      return false;
+    }
+    if (newPassword == null ||
+        newPassword.trim().isEmpty ||
+        oldPassword == newPassword) {
+      _errorMessageEvent = "old password must  not equal new password";
+      return false;
+    }
+
+    return true;
+  }
+
   _isValidSignUpdateProfile(
-      String password, String name, String phone, String rePassword) {
+    String name,
+    String phone,
+  ) {
     if (name == null || name.trim().isEmpty) {
       _errorMessageEvent = "you must write your right name ";
       return false;
@@ -46,59 +72,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
       return false;
     }
 
-    if (password == null || password.trim().isEmpty || password.length < 7) {
-      _errorMessageEvent =
-          "you must write your  password  more than 8 character";
-      return false;
-    }
-
-    if (password == password.toLowerCase || password == password.toUpperCase) {
-      _errorMessageEvent = "Password must include small and capital letter";
-      return false;
-    }
-    if (rePassword == null ||
-        rePassword.trim().isEmpty ||
-        password != rePassword) {
-      _errorMessageEvent = "password must equal RePassword";
-      return false;
-    }
-
     return true;
   }
 
-  _updateProfile() async {
+  _updatePassword(String newPassword) async {
     var connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult == ConnectivityResult.mobile ||
         connectivityResult == ConnectivityResult.wifi) {
       try {
         final user = await _auth.currentUser();
         if (user != null) {
-          String imageUrl = await _pickSaveImage(user.email.toString());
-          user.updatePassword(_passwordController.value.text);
-          await Firestore.instance.collection('users').document('user')
+          user.updatePassword(_oldPasswordController.value.text);
+          await Firestore.instance
+              .collection('users')
+              .document('user')
               .collection(user.email.toString())
-              .document("profile")
+              .document("password")
               .setData({
-            'phone': _phoneController.value.text,
-            'name': _nameController.value.text,
-            'password': _passwordController.value.text,
-            'image': imageUrl
+            'password': _oldPasswordController.value.text,
           });
-          setState(() {
-            _scaffoldKey.currentState.showSnackBar(SnackBar(
-                content: Text("profile update you will sign out now")));
-          });
-          Future.delayed(Duration(seconds: 3));
-          _logout();
         }
       } catch (error) {
-        if (error.toString().contains("ERROR_EMAIL_ALREADY_IN_USE")) {
-          _errorMessageEvent =
-              "The email address is already in use by another account";
-        }
         if (error.toString().contains("ERROR_WRONG_PASSWORD")) {
           _errorMessageEvent =
-              "The password is invalid or the user does not have a password";
+              "The old password is not true";
         }
         setState(() {
           _scaffoldKey.currentState
@@ -113,6 +110,62 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  _updateProfile() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi) {
+      try {
+        final user = await _auth.currentUser();
+        if (user != null) {
+          String imageUrl = await _pickSaveImage(user.email.toString());
+          await Firestore.instance
+              .collection('users')
+              .document('user')
+              .collection(user.email.toString())
+              .document("profile")
+              .setData({
+            'phone': _phoneController.value.text,
+            'name': _nameController.value.text,
+            'image': imageUrl
+          });
+          setState(() {
+            _scaffoldKey.currentState.showSnackBar(SnackBar(
+                content: Text("profile update you will sign out now")));
+          });
+          Future.delayed(Duration(seconds: 3));
+          _logout();
+        }
+      } catch (error) {
+        if (error.toString().contains("ERROR_EMAIL_ALREADY_IN_USE")) {
+          _errorMessageEvent =
+              "The email address is already in use by another account";
+        }
+
+        setState(() {
+          _scaffoldKey.currentState
+              .showSnackBar(SnackBar(content: Text(_errorMessageEvent)));
+        });
+      }
+    } else {
+      setState(() {
+        _scaffoldKey.currentState
+            .showSnackBar(SnackBar(content: Text("no internet connection")));
+      });
+    }
+  }
+
+  Widget customText(String text) => Padding(
+        padding: EdgeInsets.all(5),
+        child: Text(
+          text,
+          style: TextStyle(
+            decoration: TextDecoration.none,
+            fontSize: 15,
+            fontStyle: FontStyle.italic,
+          ),
+        ),
+      );
+
   _getImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
@@ -120,12 +173,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
       _image = image;
     });
   }
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _phoneController.dispose();
+    _oldPasswordController.dispose();
+    _newPasswordController.dispose();
+    super.dispose();
+  }
 
+  @override
+  void initState() {
+    _getProfile();
+    super.initState();
+  }
+
+  _pickSaveImage(String imageId) async {
+    StorageReference ref = FirebaseStorage.instance
+        .ref()
+        .child(imageId)
+        .child("profile")
+        .child("profileImage.jpg");
+    StorageUploadTask uploadTask = ref.putFile(_image);
+    return await (await uploadTask.onComplete).ref.getDownloadURL();
+  }
+
+  _getProfile() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult == ConnectivityResult.mobile ||
+        connectivityResult == ConnectivityResult.wifi) {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      _currentUser = prefs.getString('email').toString();
+      DocumentSnapshot documents = await Firestore.instance
+          .collection('users')
+          .document('user')
+          .collection(_currentUser)
+          .document("profile")
+          .get();
+
+      var data = documents.data;
+      setState(() {
+        _nameController.text = data['name'];
+        _phoneController.text = data['phone'];
+        _imageUrl = data['image'];
+      });
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-
       body: Container(
           height: MediaQuery.of(context).size.height,
           width: MediaQuery.of(context).size.width,
@@ -206,50 +303,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(
                     height: 20,
                   ),
-                  TextFormField(
-                    controller: _passwordController,
-                    keyboardType: TextInputType.text,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                        labelText: "Password",
-                        labelStyle: TextStyle(color: Colors.black),
-                        fillColor: Theme.of(context).accentColor,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(width: 5.0, color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 5,
-                            ),
-                            borderRadius: BorderRadius.circular(10))),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextFormField(
-                    controller: _rePasswordController,
-                    keyboardType: TextInputType.text,
-                    maxLines: 1,
-                    decoration: InputDecoration(
-                        labelText: "Re-Password",
-                        labelStyle: TextStyle(color: Colors.black),
-                        fillColor: Theme.of(context).accentColor,
-                        enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(width: 5.0, color: Colors.white),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                            borderSide: BorderSide(
-                              color: Colors.white,
-                              width: 5,
-                            ),
-                            borderRadius: BorderRadius.circular(10))),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
                   FlatButton(
                     shape: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(5),
@@ -260,10 +313,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     onPressed: () {
                       FocusScope.of(context).requestFocus(FocusNode());
                       if (_isValidSignUpdateProfile(
-                          _passwordController.value.text,
-                          _nameController.value.text,
-                          _phoneController.value.text,
-                          _rePasswordController.value.text)) {
+                        _nameController.value.text,
+                        _phoneController.value.text,
+                      )) {
                         _updateProfile();
                       } else {
                         setState(() {
@@ -273,48 +325,114 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       }
                     },
                   ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  FlatButton(
+                    shape: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(5),
+                        borderSide:
+                            BorderSide(color: Theme.of(context).accentColor)),
+                    color: Colors.white,
+                    child: Text('Change Password'),
+                    onPressed: () {
+                      EasyDialog(
+                          cornerRadius: 15.0,
+                          fogOpacity: 0.1,
+                          width: 300,
+                          height: 250,
+                          contentPadding: EdgeInsets.only(top: 12.0),
+                          // Needed for the button design
+                          contentList: [
+                            Container(
+                                color: Theme.of(context).backgroundColor,
+                                child: Card(
+                                    color: Colors.green,
+                                    child: customText('Change Password'))),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Container(
+                                width: 250,
+                                child: Column(
+                                  children: <Widget>[
+                                    Flexible(
+                                      child: TextField(
+                                        controller: _oldPasswordController,
+                                        maxLines: 1,
+                                        keyboardType: TextInputType.text,
+                                        decoration: InputDecoration(
+                                            labelText:
+                                                'Enter your Old Password',
+                                            border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)))),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: _newPasswordController,
+                                        maxLines: 1,
+                                        keyboardType: TextInputType.text,
+                                        decoration: InputDecoration(
+                                            labelText:
+                                                'Enter your New Password',
+                                            border: OutlineInputBorder(
+                                                borderRadius: BorderRadius.all(
+                                                    Radius.circular(10)))),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              flex: 1,
+                              child: Container(
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: <Widget>[
+                                    FlatButton(
+                                        child: Card(
+                                            color: Theme.of(context)
+                                                .backgroundColor,
+                                            child: customText("Cancel")),
+                                        onPressed: () =>
+                                            Navigator.of(context).pop()),
+                                    FlatButton(
+                                        child: Card(
+                                            color: Colors.green,
+                                            child: customText("update")),
+                                        onPressed: ()  {
+                                          if (_isValidPassword(
+                                              _oldPasswordController.text,
+                                              _newPasswordController.text)) {
+                                              _updatePassword(
+                                                  _newPasswordController.text);
+                                              Navigator.of(context).pop();
+                                          }else{
+                                            setState(() {
+                                              _scaffoldKey.currentState.showSnackBar(
+                                                  SnackBar(content: Text(_errorMessageEvent)));
+                                            });
+                                          }
+                                        }),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ]).show(context);
+                    },
+                  )
                 ],
               ),
             ],
           )),
     );
-  }
-
-  _getProfile() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
-    if (connectivityResult == ConnectivityResult.mobile ||
-        connectivityResult == ConnectivityResult.wifi) {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      _currentUser = prefs.getString('email').toString();
-      DocumentSnapshot documents = await Firestore.instance.collection('users').document('user')
-          .collection(_currentUser)
-          .document("profile")
-          .get();
-
-      var data = documents.data;
-      setState(() {
-        _passwordController.text = data['password'];
-        _rePasswordController.text = data['password'];
-        _nameController.text = data['name'];
-        _phoneController.text = data['phone'];
-        _imageUrl = data['image'];
-      });
-    }
-  }
-
-  @override
-  void initState() {
-    _getProfile();
-    super.initState();
-  }
-
-  Future<String> _pickSaveImage(String imageId) async {
-    StorageReference ref = FirebaseStorage.instance
-        .ref()
-        .child(imageId)
-        .child("profile")
-        .child("profileImage.jpg");
-    StorageUploadTask uploadTask = ref.putFile(_image);
-    return await (await uploadTask.onComplete).ref.getDownloadURL();
   }
 }

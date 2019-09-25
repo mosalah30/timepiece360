@@ -215,7 +215,7 @@ class _MyScreen extends State<_Screen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _currentUser = prefs.getString('email').toString();
       String img = imageName.substring(7, 9);
-      var total=price*int.parse(quantity)  ;
+      var total = price * int.parse(quantity);
 
       try {
         print(img);
@@ -231,14 +231,12 @@ class _MyScreen extends State<_Screen> {
           'imageName': imageName.toString(),
           'price': price.toString(),
           'total': total.toString()
-
         });
         setState(() {
           Scaffold.of(context)
               .showSnackBar(SnackBar(content: Text("product added to cart")));
         });
       } catch (e) {
-
         if (e != null) {
           setState(() {
             Scaffold.of(context)
@@ -255,6 +253,12 @@ class _MyScreen extends State<_Screen> {
   }
 
   final _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -335,152 +339,141 @@ class _MyScreen extends State<_Screen> {
                 itemCount: _imagesList.length,
                 itemBuilder: (BuildContext c, int index) {
                   return Container(
-                      height: 150,
                       child: Card(
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10.0)),
-                        elevation: 2.0,
-                        child: Column(
-                          children: <Widget>[
-                            Container(
-                                height: 160,
-                                child: Image(
-                                  image: _imagesList[index],
-                                  fit: BoxFit.fill,
-                                )),
-                            Container(
-                              color: Colors.green,
-                              height: 30,
-                              child: Row(
-                                mainAxisSize: MainAxisSize.max,
-                                children: <Widget>[
-                                  SizedBox(
-                                    width: 10,
-                                  ),
-                                  Text("Price",
-                                      style: TextStyle(
-                                        decoration: TextDecoration.none,
-                                        fontSize: 15,
-                                        fontStyle: FontStyle.italic,
-                                      )),
-                                  SizedBox(
-                                    width: 50,
-                                  ),
-                                  Text('${_listPrice[index]}   \$',
-                                      style: TextStyle(
-                                        decoration: TextDecoration.none,
-                                        fontSize: 15,
-                                        fontStyle: FontStyle.italic,
-                                      )),
-                                ],
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0)),
+                    elevation: 2.0,
+                    child: Column(
+                      children: <Widget>[
+                        Container(
+                            height: 150,
+                            child: Image(
+                              image: _imagesList[index],
+                              fit: BoxFit.fill,
+                            )),
+                        Container(
+                          color: Colors.green,
+                          height: 25,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.max,
+                            children: <Widget>[
+                              SizedBox(
+                                width: 10,
                               ),
-                            ),
-                            Expanded(
-                                flex: 1,
-                                child: FlatButton(
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Icon(Icons.add_shopping_cart),
-                                      Text('Add To Cart')
-                                    ],
-                                  ),
-                                  onPressed: () {
-                                    EasyDialog(
-                                        cornerRadius: 15.0,
-                                        fogOpacity: 0.1,
-                                        width: 300,
-                                        height: 220,
-                                        contentPadding:
-                                            EdgeInsets.only(top: 12.0),
-                                        // Needed for the button design
-                                        contentList: [
-                                          Container(
-                                              color: Theme.of(context)
-                                                  .backgroundColor,
-                                              child: Card(
-                                                  color: Colors.green,
-                                                  child: title(
-                                                      'Choose Quantity'))),
-                                          Expanded(
-                                            flex: 2,
-                                            child: Container(
-                                              width: 250,
-                                              child: Row(
-                                                children: <Widget>[
-                                                  Flexible(
-                                                    child: TextField(
-                                                      controller:
-                                                          _textController,
-                                                      maxLines: 1,
-                                                      maxLength: 5,
-                                                      keyboardType:
-                                                          TextInputType.number,
-                                                      decoration: InputDecoration(
-                                                          labelText:
-                                                              'Enter your Quantity',
-                                                          border: OutlineInputBorder(
-                                                              borderRadius: BorderRadius
-                                                                  .all(Radius
-                                                                      .circular(
-                                                                          10)))),
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                          Expanded(
-                                            flex: 1,
-                                            child: Container(
-                                              child: Row(
-                                                mainAxisSize: MainAxisSize.min,
-                                                children: <Widget>[
-                                                  FlatButton(
-                                                      child: Card(
-                                                          color: Theme.of(
-                                                                  context)
-                                                              .backgroundColor,
-                                                          child:
-                                                              title("Cancel")),
-                                                      onPressed: () =>
-                                                          Navigator.of(context)
-                                                              .pop()),
-                                                  FlatButton(
-                                                      child: Card(
-                                                          color: Colors.green,
-                                                          child: title("Save")),
-                                                      onPressed: () {
-                                                        if (_textController
-                                                            .text.isNotEmpty) {
-                                                          _addToCart(
-                                                              _textController
-                                                                  .text,
-                                                              _imagesList[index]
-                                                                  .assetName,
-                                                              _listPrice[index]
-                                                                  );
-                                                          Navigator.of(context)
-                                                              .pop();
-                                                        }
-                                                      }),
-                                                ],
-                                              ),
-                                            ),
-                                          ),
-                                        ]).show(context);
-                                  },
-                                  color: Theme.of(context).backgroundColor,
-                                ))
-                          ],
+                              Text("Price",
+                                  style: TextStyle(
+                                    decoration: TextDecoration.none,
+                                    fontSize: 15,
+                                    fontStyle: FontStyle.italic,
+                                  )),
+                              SizedBox(
+                                width: 50,
+                              ),
+                              Text('${_listPrice[index]}   \$',
+                                  style: TextStyle(
+                                    decoration: TextDecoration.none,
+                                    fontSize: 15,
+                                    fontStyle: FontStyle.italic,
+                                  )),
+                            ],
+                          ),
                         ),
-                      ));
+                        Expanded(
+                          child: FlatButton(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                Icon(Icons.add_shopping_cart),
+                                Text('Add To Cart')
+                              ],
+                            ),
+                            onPressed: () {
+                              EasyDialog(
+                                  cornerRadius: 15.0,
+                                  fogOpacity: 0.1,
+                                  width: 300,
+                                  height: 220,
+                                  contentPadding: EdgeInsets.only(top: 12.0),
+                                  // Needed for the button design
+                                  contentList: [
+                                    Container(
+                                        color:
+                                            Theme.of(context).backgroundColor,
+                                        child: Card(
+                                            color: Colors.green,
+                                            child: title('Choose Quantity'))),
+                                    Expanded(
+                                      flex: 2,
+                                      child: Container(
+                                        width: 250,
+                                        child: Row(
+                                          children: <Widget>[
+                                            Flexible(
+                                              child: TextField(
+                                                controller: _textController,
+                                                maxLines: 1,
+                                                maxLength: 5,
+                                                keyboardType:
+                                                    TextInputType.number,
+                                                decoration: InputDecoration(
+                                                    labelText:
+                                                        'Enter your Quantity',
+                                                    border: OutlineInputBorder(
+                                                        borderRadius:
+                                                            BorderRadius.all(
+                                                                Radius.circular(
+                                                                    10)))),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Expanded(
+                                      flex: 1,
+                                      child: Container(
+                                        child: Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: <Widget>[
+                                            FlatButton(
+                                                child: Card(
+                                                    color: Theme.of(context)
+                                                        .backgroundColor,
+                                                    child: title("Cancel")),
+                                                onPressed: () =>
+                                                    Navigator.of(context)
+                                                        .pop()),
+                                            FlatButton(
+                                                child: Card(
+                                                    color: Colors.green,
+                                                    child: title("Save")),
+                                                onPressed: () {
+                                                  if (_textController
+                                                      .text.isNotEmpty) {
+                                                    _addToCart(
+                                                        _textController.text,
+                                                        _imagesList[index]
+                                                            .assetName,
+                                                        _listPrice[index]);
+                                                    _textController.text="";
+                                                    Navigator.of(context).pop();
+                                                  }
+                                                }),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ]).show(context);
+                            },
+                            color: Theme.of(context).backgroundColor,
+                          ),
+                        )
+                      ],
+                    ),
+                  ));
                 },
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: 2,
-                  childAspectRatio: MediaQuery.of(context).size.width /
-                      (MediaQuery.of(context).size.height / 1.60),
                 ),
               ),
             )
