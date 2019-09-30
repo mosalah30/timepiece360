@@ -47,34 +47,65 @@ class _ProductsState extends State<Products> {
                         children: <Widget>[
                           Container(
                               margin: EdgeInsets.all(5),
-                              height: 100,
                               width: MediaQuery.of(context).size.width,
-                              child: Card(
-                                child: ListTile(
-                                  title: _titleText('price  \$ ' +
-                                      snapshot.data[index].data['price']),
-                                  leading: Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: CircleAvatar(
-                                      backgroundImage: AssetImage(snapshot
-                                          .data[index].data['imageName']),
+                              child: Dismissible(
+                                onDismissed: (dir) {
+                                  setState(() {
+                                    _removeItem(snapshot.data[index].data['id']);
+                                    snapshot.data.removeAt(index);
+                                    _getCurrentUserItemCard();
+
+
+                                  });
+                                  Scaffold.of(context).showSnackBar(
+                                      SnackBar(
+                                    content: Text(
+                                             'Item Removed'
+                                           ),
+                                    action: SnackBarAction(
+                                      label: 'UNDO',
+                                      onPressed: () {},
                                     ),
-                                  ),
-                                  subtitle: _titleText('quantity  ' +
-                                      snapshot.data[index].data['quantity']),
-                                  trailing: Container(
-                                    width: 90,
-                                    child: Column(
-                                      children: <Widget>[
-                                        _titleText('Total'),
-                                        Expanded(
-                                            child: _titleText('\$ ' +
-                                                snapshot
-                                                    .data[index].data['total']))
-                                      ],
+                                  ));
+                                },
+                                child: Card(
+                                  child: ListTile(
+                                    title: _titleText('price  \$ ' +
+                                        snapshot.data[index].data['price']),
+                                    leading: Container(
+                                      margin: EdgeInsets.all(5),
+                                      child: CircleAvatar(
+                                        backgroundImage: AssetImage(snapshot
+                                            .data[index].data['imageName']),
+                                      ),
+                                    ),
+                                    subtitle: _titleText('quantity  ' +
+                                        snapshot.data[index].data['quantity']),
+                                    trailing: Container(
+                                      width: 90,
+                                      child: Column(
+                                        children: <Widget>[
+                                          _titleText('Total'),
+                                          Expanded(
+                                              child: _titleText('\$ ' +
+                                                  snapshot.data[index]
+                                                      .data['total']))
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
+                                key:
+                                    Key(snapshot.data[index].data['id']),
+                                background: Container(
+                                  color: Colors.red,
+                                  child: Icon(Icons.delete),
+                                  alignment: Alignment.centerLeft,
+                                ),secondaryBackground: Container(
+                                color: Colors.red,
+                                child: Icon(Icons.delete),
+                                alignment: Alignment.centerRight,
+                              ),
                               )),
                           Divider()
                         ],
@@ -110,7 +141,9 @@ class _ProductsState extends State<Products> {
                   child: Container(
                       height: 40,
                       child: Card(
-                          child: Center(child: _titleText('\$ '+_overallBill.toString()))))),
+                          child: Center(
+                              child: _titleText(
+                                  '\$ ' + _overallBill.toString()))))),
             ],
           ))
         ],
@@ -118,9 +151,23 @@ class _ProductsState extends State<Products> {
     );
   }
 
+  _removeItem(String nameItem) async {
+    await Firestore.instance
+        .collection('users')
+        .document('user')
+        .collection(_currentUser)
+        .document('cart')
+        .collection('id')
+        .document(nameItem)
+        .delete();
+  }
+
+
   _getCurrentUserItemCard() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    _currentUser = prefs.getString('email').toString();
+    setState(() {
+      _currentUser = prefs.getString('email').toString();
+    });
     var documents = await Firestore.instance
         .collection('users')
         .document('user')

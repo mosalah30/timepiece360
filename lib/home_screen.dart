@@ -215,10 +215,11 @@ class _MyScreen extends State<_Screen> {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       _currentUser = prefs.getString('email').toString();
       String img = imageName.substring(7, 9);
+        img.replaceAll('.', '');
+
       var total = price * int.parse(quantity);
 
       try {
-        print(img);
         await Firestore.instance
             .collection('users')
             .document('user')
@@ -230,7 +231,8 @@ class _MyScreen extends State<_Screen> {
           "quantity": quantity.toString(),
           'imageName': imageName.toString(),
           'price': price.toString(),
-          'total': total.toString()
+          'total': total.toString(),
+          'id':img
         });
         setState(() {
           Scaffold.of(context)

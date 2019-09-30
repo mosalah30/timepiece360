@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
@@ -115,7 +117,19 @@ class _StateMySignUp extends State<_MySignUP> {
       });
     }
   }
+  var _isLoading = false;
 
+  _getDelay() {
+    setState(() {
+      _isLoading = true;
+    });
+    final duration = Duration(seconds: 3);
+    Timer(duration, () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
   _saveProfile({String email, String password}) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setString('email', email);
@@ -129,7 +143,11 @@ class _StateMySignUp extends State<_MySignUP> {
       color: Theme.of(context).backgroundColor,
       child: Container(
         margin: EdgeInsets.only(left: 20, right: 20),
-        child: ListView(
+        child:_isLoading == true
+            ? Center(
+          child: CircularProgressIndicator(),
+        )
+            : ListView(
           children: <Widget>[
             Column(
               mainAxisSize: MainAxisSize.max,
@@ -264,6 +282,7 @@ class _StateMySignUp extends State<_MySignUP> {
                         _phoneController.value.text,
                         _rePasswordController.value.text)) {
                       _register();
+                      _getDelay();
                     } else {
                       setState(() {
                         Scaffold.of(context).showSnackBar(

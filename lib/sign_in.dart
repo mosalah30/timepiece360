@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:connectivity/connectivity.dart';
@@ -14,7 +16,6 @@ class LoginScreen extends StatelessWidget {
         title: Text("Time Piece 360"),
       ),
       body: _MyLoginScreen(),
-
     );
   }
 }
@@ -99,110 +100,128 @@ class _LoginScreenState extends State<_MyLoginScreen> {
     }
   }
 
+  var _isLoading = false;
+
+  _getDelay() {
+    setState(() {
+      _isLoading = true;
+    });
+    final duration = Duration(seconds: 3);
+    Timer(duration, () {
+      setState(() {
+        _isLoading = false;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Theme.of(context).backgroundColor,
       child: Container(
         margin: EdgeInsets.all(20),
-        child: ListView(
-          children: <Widget>[
-            SizedBox(height: 100),
-            Center(
-              child: Text(
-                "Sign In",
-                style: TextStyle(
-                    decoration: TextDecoration.none,
-                    fontSize: 50,
-                    fontStyle: FontStyle.italic,
-                    color: Theme.of(context).accentColor),
-              ),
-            ),
-            SizedBox(height: 30),
-            TextFormField(
-                controller: _emailController,
-                keyboardType: TextInputType.emailAddress,
-                maxLines: 1,
-                decoration: InputDecoration(
-                    labelText: "Email",
-                    fillColor: Theme.of(context).accentColor,
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          width: 5.0, color: Theme.of(context).accentColor),
+        child: _isLoading == true
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : ListView(
+                children: <Widget>[
+                  SizedBox(height: 100),
+                  Center(
+                    child: Text(
+                      "Sign In",
+                      style: TextStyle(
+                          decoration: TextDecoration.none,
+                          fontSize: 50,
+                          fontStyle: FontStyle.italic,
+                          color: Theme.of(context).accentColor),
                     ),
-                    focusedBorder: OutlineInputBorder(
-                        borderSide: BorderSide(
-                          color: Theme.of(context).accentColor,
-                          width: 5,
-                        ),
-                        borderRadius: BorderRadius.circular(10)))),
-            SizedBox(
-              height: 20,
-            ),
-            TextFormField(
-              controller: _passwordController,
-              keyboardType: TextInputType.emailAddress,
-              maxLines: 1,
-              obscureText: true,
-              decoration: InputDecoration(
-                  labelText: ' Password',
-                  enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                          width: 5.0,
-                          color: Theme.of(context).accentColor)),
-                  focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Theme.of(context).accentColor,
-                        width: 5,
-                      ),
-                      borderRadius: BorderRadius.circular(10))),
-            ),
-            SizedBox(
-              height: 20,
-            ),
-            Center(
-              child: FlatButton(
-                shape: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    borderSide:
-                        BorderSide(color: Theme.of(context).accentColor)),
-                color: Theme.of(context).accentColor,
-                child: Text("Sign in"),
-                onPressed: () {
-                  FocusScope.of(context).requestFocus(new FocusNode());
+                  ),
+                  SizedBox(height: 30),
+                  TextFormField(
+                      controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      maxLines: 1,
+                      decoration: InputDecoration(
+                          labelText: "Email",
+                          fillColor: Theme.of(context).accentColor,
+                          enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 5.0,
+                                color: Theme.of(context).accentColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: Theme.of(context).accentColor,
+                                width: 5,
+                              ),
+                              borderRadius: BorderRadius.circular(10)))),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  TextFormField(
+                    controller: _passwordController,
+                    keyboardType: TextInputType.emailAddress,
+                    maxLines: 1,
+                    obscureText: true,
+                    decoration: InputDecoration(
+                        labelText: ' Password',
+                        enabledBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                                width: 5.0,
+                                color: Theme.of(context).accentColor)),
+                        focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: Theme.of(context).accentColor,
+                              width: 5,
+                            ),
+                            borderRadius: BorderRadius.circular(10))),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Center(
+                    child: FlatButton(
+                      shape: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).accentColor)),
+                      color: Theme.of(context).accentColor,
+                      child: Text("Sign in"),
+                      onPressed: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
 
-                  if (_isValidSignIn(_emailController.value.text,
-                      _passwordController.value.text)) {
-                    _signInWithEmailAndPassword();
-                  } else {
-                    setState(() {
-                      Scaffold.of(context).showSnackBar(
-                          SnackBar(content: Text(_errorMessageEvent)));
-                    });
-                  }
-
-                },
+                        if (_isValidSignIn(_emailController.value.text,
+                            _passwordController.value.text)) {
+                          _signInWithEmailAndPassword();
+                          _getDelay();
+                        } else {
+                          setState(() {
+                            Scaffold.of(context).showSnackBar(
+                                SnackBar(content: Text(_errorMessageEvent)));
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Center(
+                    child: FlatButton(
+                      shape: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide:
+                              BorderSide(color: Theme.of(context).accentColor)),
+                      color: Theme.of(context).accentColor,
+                      child: Text("Sign Up"),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed('/SignUp');
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(
-              height: 30,
-            ),
-            Center(
-              child: FlatButton(
-                shape: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(5),
-                    borderSide:
-                        BorderSide(color: Theme.of(context).accentColor)),
-                color: Theme.of(context).accentColor,
-                child: Text("Sign Up"),
-                onPressed: () {
-                  Navigator.of(context).pushNamed('/SignUp');
-                },
-              ),
-            ),
-
-          ],
-        ),
       ),
     );
   }
