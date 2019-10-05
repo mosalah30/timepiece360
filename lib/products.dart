@@ -98,6 +98,7 @@ class _ProductsState extends State<Products> {
                                 key:
                                     Key(snapshot.data[index].data['id']),
                                 background: Container(
+                                  padding: EdgeInsets.all(8),
                                   color: Colors.red,
                                   child: Icon(Icons.delete),
                                   alignment: Alignment.centerLeft,
