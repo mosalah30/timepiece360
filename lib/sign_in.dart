@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +30,9 @@ class _LoginScreenState extends State<_MyLoginScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  RegExp regExp = RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
 
-  String _errorMessageEvent = "";
+  String _errorMessageEvent;
 
   _isValidSignIn(String email, String password) {
     if (email == null || email.trim().isEmpty) {
@@ -47,7 +47,8 @@ class _LoginScreenState extends State<_MyLoginScreen> {
     }
 
     if (password == password.toLowerCase() ||
-        password == password.toUpperCase()) {
+        password == password.toUpperCase() ||
+        !regExp.hasMatch(email)) {
       _errorMessageEvent = "Password must include small and capital letter";
       return false;
     }
@@ -77,6 +78,7 @@ class _LoginScreenState extends State<_MyLoginScreen> {
           return user;
         }
       } catch (error) {
+
         if (error.toString().contains("ERROR_USER_NOT_FOUND")) {
           _errorMessageEvent = "this email is not found";
         }
@@ -85,6 +87,7 @@ class _LoginScreenState extends State<_MyLoginScreen> {
               "The password is invalid or the user does not have a password";
         }
         setState(() {
+          _isLoading = false;
           Scaffold.of(context)
               .showSnackBar(SnackBar(content: Text(_errorMessageEvent)));
         });
@@ -102,15 +105,9 @@ class _LoginScreenState extends State<_MyLoginScreen> {
 
   var _isLoading = false;
 
-  _getDelay() {
+  _getCircularProgress() {
     setState(() {
       _isLoading = true;
-    });
-    final duration = Duration(seconds: 3);
-    Timer(duration, () {
-      setState(() {
-        _isLoading = false;
-      });
     });
   }
 
@@ -194,7 +191,9 @@ class _LoginScreenState extends State<_MyLoginScreen> {
                         if (_isValidSignIn(_emailController.value.text,
                             _passwordController.value.text)) {
                           _signInWithEmailAndPassword();
-                          _getDelay();
+                          _getCircularProgress();
+
+
                         } else {
                           setState(() {
                             Scaffold.of(context).showSnackBar(
@@ -228,6 +227,7 @@ class _LoginScreenState extends State<_MyLoginScreen> {
 
   @override
   void initState() {
+
     super.initState();
   }
 

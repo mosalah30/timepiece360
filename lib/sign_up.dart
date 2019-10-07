@@ -1,4 +1,3 @@
-import 'dart:async';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -101,11 +100,13 @@ class _StateMySignUp extends State<_MySignUP> {
           Navigator.pushReplacementNamed(context, "/HomeScreen");
         }
       } catch (error) {
+
         if (error.toString().contains("ERROR_EMAIL_ALREADY_IN_USE")) {
           _errorMessageEvent =
               "The email address is already in use by another account";
         }
         setState(() {
+          _isLoading=false;
           Scaffold.of(context)
               .showSnackBar(SnackBar(content: Text(_errorMessageEvent)));
         });
@@ -117,17 +118,12 @@ class _StateMySignUp extends State<_MySignUP> {
       });
     }
   }
+
   var _isLoading = false;
 
-  _getDelay() {
+  _getCircularProgress() {
     setState(() {
       _isLoading = true;
-    });
-    final duration = Duration(seconds: 3);
-    Timer(duration, () {
-      setState(() {
-        _isLoading = false;
-      });
     });
   }
   _saveProfile({String email, String password}) async {
@@ -209,6 +205,7 @@ class _StateMySignUp extends State<_MySignUP> {
                   controller: _phoneController,
                   keyboardType: TextInputType.number,
                   maxLines: 1,
+                  maxLength: 11,
                   decoration: InputDecoration(
                       labelText: "Phone",
                       fillColor: Theme.of(context).accentColor,
@@ -265,32 +262,38 @@ class _StateMySignUp extends State<_MySignUP> {
                 SizedBox(
                   height: 20,
                 ),
-                FlatButton(
-                  shape: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(5),
-                      borderSide:
+                Row(children: <Widget>[
+                  Expanded(
+                    child: FlatButton(
+                      shape: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(5),
+                          borderSide:
                           BorderSide(color: Theme.of(context).accentColor)),
-                  color: Colors.white,
-                  child: Text("Sign up"),
-                  onPressed: () {
-                    FocusScope.of(context).requestFocus(new FocusNode());
+                      color: Colors.white,
+                      child: Text("Sign up"),
+                      onPressed: () {
+                        FocusScope.of(context).requestFocus(new FocusNode());
 
-                    if (_isValidSignUp(
-                        _emailController.value.text,
-                        _passwordController.value.text,
-                        _nameController.value.text,
-                        _phoneController.value.text,
-                        _rePasswordController.value.text)) {
-                      _register();
-                      _getDelay();
-                    } else {
-                      setState(() {
-                        Scaffold.of(context).showSnackBar(
-                            SnackBar(content: Text(_errorMessageEvent)));
-                      });
-                    }
-                  },
-                ),
+                        if (_isValidSignUp(
+                            _emailController.value.text,
+                            _passwordController.value.text,
+                            _nameController.value.text,
+                            _phoneController.value.text,
+                            _rePasswordController.value.text)) {
+                          _register();
+                          _getCircularProgress();
+                        } else {
+                          setState(() {
+                            Scaffold.of(context).showSnackBar(
+                                SnackBar(content: Text(_errorMessageEvent)));
+                          });
+                        }
+                      },
+                    ),
+                  ),
+
+                ],)
+
               ],
             ),
           ],
