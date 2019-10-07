@@ -177,59 +177,60 @@ class _LoginScreenState extends State<_MyLoginScreen> {
                   SizedBox(
                     height: 20,
                   ),
-                  Center(
-                    child: FlatButton(
-                      shape: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          borderSide:
+                  Row(
+                    children: <Widget>[
+                      Expanded(
+                        child: FlatButton(
+                          shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide:
                               BorderSide(color: Theme.of(context).accentColor)),
-                      color: Theme.of(context).accentColor,
-                      child: Text("Sign in"),
-                      onPressed: () {
-                        FocusScope.of(context).requestFocus(new FocusNode());
+                          color: Theme.of(context).accentColor,
+                          child: Text("Sign in"),
+                          onPressed: () {
+                            FocusScope.of(context).requestFocus(new FocusNode());
 
-                        if (_isValidSignIn(_emailController.value.text,
-                            _passwordController.value.text)) {
-                          _signInWithEmailAndPassword();
-                          _getCircularProgress();
+                            if (_isValidSignIn(_emailController.value.text,
+                                _passwordController.value.text)) {
+                              _signInWithEmailAndPassword();
+                              _getCircularProgress();
 
 
-                        } else {
-                          setState(() {
-                            Scaffold.of(context).showSnackBar(
-                                SnackBar(content: Text(_errorMessageEvent)));
-                          });
-                        }
-                      },
-                    ),
-                  ),
-                  SizedBox(
-                    height: 30,
-                  ),
-                  Center(
-                    child: FlatButton(
-                      shape: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(5),
-                          borderSide:
+                            } else {
+                              setState(() {
+                                Scaffold.of(context).showSnackBar(
+                                    SnackBar(content: Text(_errorMessageEvent)));
+                              });
+                            }
+                          },
+                        ),
+                      ),
+                      SizedBox(
+                        width: 30,
+                      ),
+                      Expanded(
+                        child: FlatButton(
+                          shape: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(5),
+                              borderSide:
                               BorderSide(color: Theme.of(context).accentColor)),
-                      color: Theme.of(context).accentColor,
-                      child: Text("Sign Up"),
-                      onPressed: () {
-                        Navigator.of(context).pushNamed('/SignUp');
-                      },
-                    ),
-                  ),
+                          color: Theme.of(context).accentColor,
+                          child: Text("Sign Up"),
+                          onPressed: () {
+                            Navigator.of(context).pushNamed('/SignUp');
+                          },
+                        ),
+                      ),
+                    ],
+                  )
+
                 ],
               ),
       ),
     );
   }
 
-  @override
-  void initState() {
 
-    super.initState();
-  }
 
   @override
   void dispose() {
